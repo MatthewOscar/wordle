@@ -3,6 +3,7 @@ import { useRoutes, Link } from 'react-router-dom';
 import Header from './components/Header.jsx'
 import Game from './components/Game.jsx'
 import Login from './pages/Login.jsx'
+import Stats from './pages/Stats.jsx'
 import './components/Tile.jsx'
 import './App.css'
 
@@ -27,6 +28,10 @@ function App() {
     {
       path: "/login",
       element: <Login />
+    },
+    {
+      path: "/stats",
+      element: <Stats />
     }
   ]);
 

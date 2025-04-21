@@ -12,6 +12,7 @@ const Game = ({ theme }) => {
     const [secretWord, setSecretWord] = useState('react'); // Example secret word
     const [keyStatuses, setKeyStatuses] = useState({});
     const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', or 'lost'
+    const [pendingWin, setPendingWin] = useState(false); // State to track a pending win
 
     // Fetch user stats from the database
     const [userStats, setUserStats] = useState({
@@ -24,7 +25,7 @@ const Game = ({ theme }) => {
         const fetchStats = async () => {
             const { data, error } = await supabase
                 .from('users')
-                .select('games_won, current_streak, max_streak')
+                .select('games_won, current_streak, max_streak, words_played')
                 .single();
 
             if (error) {
@@ -69,6 +70,7 @@ const Game = ({ theme }) => {
             games_won: userStats.games_won + 1,
             current_streak: userStats.current_streak + 1,
             max_streak: Math.max(userStats.max_streak, userStats.current_streak + 1), // Update max_streak if needed
+            words_played: [...(userStats.words_played || []), secretWord], // Add the secret word to words_played
         };
     
         const { error: updateError } = await supabase
@@ -117,6 +119,7 @@ const Game = ({ theme }) => {
         const updatedStats = {
             max_streak: Math.max(userData.max_streak, userData.current_streak),
             current_streak: 0,
+            words_played: [...(userStats.words_played || []), secretWord], // Add the secret word to words_played
         };
     
         const { error: updateError } = await supabase
@@ -154,40 +157,31 @@ const Game = ({ theme }) => {
     };
 
     const handleKeyPress = (key) => {
-        // Prevent input if all rows are filled
-        if (currentRow >= 6) {
-            return;
-        }
-        
+        if (gameStatus !== 'playing') return; // Prevent input if the game is over
+    
         if (key === 'Enter' && currentWord.length === 5) {
-            // Check if the word exists in the words list
             if (!words.includes(currentWord.toLowerCase())) {
-                alert('Word not in list!'); // Notify the user
-                return; // Do not proceed if the word is invalid
+                alert('Word not in list!');
+                return;
             }
     
-            // Submit the current word
             const newBoard = [...board];
             newBoard[currentRow] = currentWord.split('');
-            setBoard(newBoard);
-
+            setBoard(newBoard); // Update the board state
+    
             if (currentWord.toLowerCase() === secretWord) {
-                // Delay setting the game status to 'won' to allow the UI to render the final word's colors
-                setTimeout(() => {
-                    setGameStatus('won'); // Player wins
-                    updateStatsOnWin(); // Update stats in the database
-                }, 300); // Delay by 300ms
+                // Mark a pending win instead of directly setting gameStatus
+                setPendingWin(true);
             } else if (currentRow === 5) {
-                setGameStatus('lost'); // Player loses
+                setGameStatus('lost'); // Update the game status to 'lost'
                 updateStatsOnLoss(); // Update stats in the database
             } else {
-                setCurrentRow(currentRow + 1);
-                setCurrentWord('');
+                setCurrentRow(currentRow + 1); // Move to the next row
+                setCurrentWord(''); // Reset the current word
             }
-
-            updateKeyStatuses();
+    
+            updateKeyStatuses(); // Update the keyboard statuses
         } else if (key === 'Backspace') {
-            // Remove the last letter
             const updatedWord = currentWord.slice(0, -1);
             setCurrentWord(updatedWord);
     
@@ -195,7 +189,6 @@ const Game = ({ theme }) => {
             newBoard[currentRow] = updatedWord.split('').concat(Array(5 - updatedWord.length).fill(''));
             setBoard(newBoard);
         } else if (currentWord.length < 5 && /^[a-zA-Z]$/.test(key)) {
-            // Add a new letter
             const updatedWord = currentWord + key;
             setCurrentWord(updatedWord);
     
@@ -204,6 +197,20 @@ const Game = ({ theme }) => {
             setBoard(newBoard);
         }
     };
+    
+    // New useEffect to handle pending wins
+    useEffect(() => {
+        if (pendingWin) {
+        // Introduce a small delay to allow React to render the updated board
+        const timer = setTimeout(() => {
+            setGameStatus('won');
+            updateStatsOnWin(); // Update stats in the database
+            setPendingWin(false); // Reset the pending win state
+        }, 2000); // Delay of 2000ms
+
+        return () => clearTimeout(timer); // Cleanup the timer
+        }
+    }, [board, pendingWin]); // Run this effect when the board or pendingWin changes
 
     const resetGame = () => {
         setBoard(Array.from({ length: 6 }, () => Array(5).fill('')));
@@ -211,8 +218,15 @@ const Game = ({ theme }) => {
         setCurrentWord('');
         setKeyStatuses({});
         setGameStatus('playing');
-        const randomWord = words[Math.floor(Math.random() * words.length)];
-        setSecretWord(randomWord);
+
+        // Select a new secret word that is not in the words_played list
+        const playedWords = userStats.words_played || [];
+        let newSecretWord = '';
+        do {
+            newSecretWord = words[Math.floor(Math.random() * words.length)];
+        } while (playedWords.includes(newSecretWord));
+
+        setSecretWord(newSecretWord);
     };
 
     useEffect(() => {
@@ -222,8 +236,15 @@ const Game = ({ theme }) => {
             .then(text => {
                 const wordList = text.split('\n').map(word => word.trim());
                 setWords(wordList);
-                const randomWord = wordList[Math.floor(Math.random() * wordList.length)];
-                setSecretWord(randomWord);
+
+                // Select the initial secret word
+                const playedWords = userStats.words_played || [];
+                let initialSecretWord = '';
+                do {
+                    initialSecretWord = wordList[Math.floor(Math.random() * wordList.length)];
+                } while (playedWords.includes(initialSecretWord));
+
+                setSecretWord(initialSecretWord);
             })
             .catch(error => console.error('Error fetching words:', error));
     }, []);

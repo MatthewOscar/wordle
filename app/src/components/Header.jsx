@@ -33,6 +33,9 @@ const Header = ({ theme, toggleTheme }) => {
 
     return (
         <header className="header">
+            <div className="header-user">
+                {user ? user.email : 'Guest'}
+            </div>
             <div className="header-options">
                 <Link to="/" className="header-link">Home</Link>
                 <Link to="/stats" className="header-link">Stats</Link>
