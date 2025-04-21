@@ -11,6 +11,7 @@ const Game = () => {
     const [words, setWords] = useState([]);
     const [secretWord, setSecretWord] = useState('react'); // Example secret word
     const [keyStatuses, setKeyStatuses] = useState({});
+    const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', or 'lost'
     
     const getTileStatus = (letter, index) => {
         if (!secretWord.includes(letter)) return 'absent';
@@ -48,9 +49,17 @@ const Game = () => {
             const newBoard = [...board];
             newBoard[currentRow] = currentWord.split('');
             setBoard(newBoard);
+
+            if (currentWord.toLowerCase() === secretWord) {
+                setGameStatus('won'); // Player wins
+            } else if (currentRow === 5) {
+                setGameStatus('lost'); // Player loses
+            } else {
+                setCurrentRow(currentRow + 1);
+                setCurrentWord('');
+            }
+
             updateKeyStatuses();
-            setCurrentRow(currentRow + 1);
-            setCurrentWord('');
         } else if (key === 'Backspace') {
             // Remove the last letter
             const updatedWord = currentWord.slice(0, -1);
@@ -68,6 +77,16 @@ const Game = () => {
             newBoard[currentRow] = updatedWord.split('').concat(Array(5 - updatedWord.length).fill(''));
             setBoard(newBoard);
         }
+    };
+
+    const resetGame = () => {
+        setBoard(Array.from({ length: 6 }, () => Array(5).fill('')));
+        setCurrentRow(0);
+        setCurrentWord('');
+        setKeyStatuses({});
+        setGameStatus('playing');
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+        setSecretWord(randomWord);
     };
 
     useEffect(() => {
@@ -104,6 +123,18 @@ const Game = () => {
                     </div>
                 ))}
             </div>
+            {gameStatus === 'won' && (
+                <div className="game-message">
+                    <p>Congratulations! You guessed the word!</p>
+                    <button onClick={resetGame}>Play Again</button>
+                </div>
+            )}
+            {gameStatus === 'lost' && (
+                <div className="game-message">
+                    <p>Game Over! The word was: {secretWord}</p>
+                    <button onClick={resetGame}>Play Again</button>
+                </div>
+            )}
             <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
         </div>
     )

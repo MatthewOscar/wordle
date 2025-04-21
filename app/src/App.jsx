@@ -19,7 +19,7 @@ function App() {
 
   return (
     <div>
-      <header></header>
+      <header><h1>WORDLE: By Matthew Wyatt</h1></header>
       <main>
         {elements}
       </main>
