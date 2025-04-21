@@ -4,7 +4,7 @@ import Tile from './Tile.jsx';
 import Keyboard from './Keyboard.jsx';
 import './Game.css'
 
-const Game = () => {
+const Game = ({ theme }) => {
     const [board, setBoard] = useState(Array.from({ length: 6 }, () => Array(5).fill('')));
     const [currentRow, setCurrentRow] = useState(0);
     const [currentWord, setCurrentWord] = useState('');

@@ -1,8 +1,35 @@
 #root {
+  --background-color: #f5f5f5; /* Light theme background (soft white) */
+  --text-color: #333333; /* Light theme text (dark gray) */
+  --tile-bg: #333333; /* Dark gray squares for light theme */
+  --tile-text: #eaeaea; /* Light gray text for dark gray squares */
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
+  box-sizing: border-box; /* Ensure consistent box model */
+}
+
+[data-theme="dark"] {
+  --background-color: #1e1e1e; /* Dark theme background (dark gray) */
+  --text-color: #e0e0e0; /* Dark theme text (light gray) */
+  --tile-bg: #e0e0e0; /* Light gray squares for dark theme */
+  --tile-text: #2b2b2b; /* Darker gray text for light gray squares */
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  opacity: 0.8;
 }
 
 .logo {
@@ -11,9 +38,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }

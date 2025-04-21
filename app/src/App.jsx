@@ -1,25 +1,40 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRoutes, Link } from 'react-router-dom';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import Header from './components/Header.jsx'
 import Game from './components/Game.jsx'
+import Login from './pages/Login.jsx'
 import './components/Tile.jsx'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [theme, setTheme] = useState('light'); // State to manage theme
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
+  // Apply the theme to the root element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Set up routes
   let elements = useRoutes([
     {
       path: "/",
-      element: <Game />
+      element: <Game theme={theme} />
+    },
+    {
+      path: "/login",
+      element: <Login />
     }
   ]);
 
   return (
     <div>
-      <header><h1>WORDLE: By Matthew Wyatt</h1></header>
+      <Header theme={theme} toggleTheme={toggleTheme} />
       <main>
         {elements}
       </main>

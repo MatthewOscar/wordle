@@ -1,4 +1,3 @@
-
 .keyboard {
     display: flex;
     flex-direction: column;
@@ -19,32 +18,32 @@
     font-size: 1rem;
     font-weight: bold;
     text-transform: uppercase;
-    border: 2px solid #d3d6da;
-    background-color: #ffffff;
-    color: #000000;
+    border: 2px solid var(--tile-border, #d3d6da);
+    background-color: var(--tile-bg, #ffffff);
+    color: var(--tile-text, #000000);
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s, border-color 0.3s;
 }
 
 .key.correct {
-    background-color: #6aaa64; /* Green for correct letter and position */
+    background-color: #6aaa64;
     border-color: #6aaa64;
     color: #ffffff;
 }
 
 .key.present {
-    background-color: #c9b458; /* Yellow for correct letter, wrong position */
+    background-color: #c9b458;
     border-color: #c9b458;
     color: #ffffff;
 }
 
 .key.absent {
-    background-color: #787c7e; /* Gray for letter not in the word */
+    background-color: #787c7e;
     border-color: #787c7e;
     color: #ffffff;
 }
 
 .key:active {
-    transform: scale(0.95); /* Slightly shrink key when clicked */
+    transform: scale(0.95);
 }
