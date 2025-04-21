@@ -228,7 +228,7 @@ const Game = ({ theme }) => {
 
     useEffect(() => {
         // Fetch words from words.txt
-        fetch('/src/components/words.txt')
+        fetch('/words.txt')
             .then(response => response.text())
             .then(text => {
                 const wordList = text.split('\n').map(word => word.trim());
