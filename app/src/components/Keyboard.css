@@ -1,0 +1,50 @@
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.key {
+    width: 40px;
+    height: 50px;
+    margin: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 2px solid #d3d6da;
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.key.correct {
+    background-color: #6aaa64; /* Green for correct letter and position */
+    border-color: #6aaa64;
+    color: #ffffff;
+}
+
+.key.present {
+    background-color: #c9b458; /* Yellow for correct letter, wrong position */
+    border-color: #c9b458;
+    color: #ffffff;
+}
+
+.key.absent {
+    background-color: #787c7e; /* Gray for letter not in the word */
+    border-color: #787c7e;
+    color: #ffffff;
+}
+
+.key:active {
+    transform: scale(0.95); /* Slightly shrink key when clicked */
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../Client';
 import Tile from './Tile.jsx';
+import Keyboard from './Keyboard.jsx';
 import './Game.css'
 
 const Game = () => {
@@ -9,6 +10,7 @@ const Game = () => {
     const [currentWord, setCurrentWord] = useState('');
     const [words, setWords] = useState([]);
     const [secretWord, setSecretWord] = useState('react'); // Example secret word
+    const [keyStatuses, setKeyStatuses] = useState({});
     
     const getTileStatus = (letter, index) => {
         if (!secretWord.includes(letter)) return 'absent';
@@ -16,8 +18,32 @@ const Game = () => {
         return 'present';
     };
 
+    const updateKeyStatuses = () => {
+        const newStatuses = { ...keyStatuses };
+        board[currentRow].forEach((letter, index) => {
+            const status = getTileStatus(letter, index);
+            if (status === 'correct' || (status === 'present' && newStatuses[letter] !== 'correct')) {
+                newStatuses[letter] = status;
+            } else if (!newStatuses[letter]) {
+                newStatuses[letter] = 'absent';
+            }
+        });
+        setKeyStatuses(newStatuses);
+    };
+
     const handleKeyPress = (key) => {
+        // Prevent input if all rows are filled
+        if (currentRow >= 6) {
+            return;
+        }
+        
         if (key === 'Enter' && currentWord.length === 5) {
+            // Check if the word exists in the words list
+            if (!words.includes(currentWord.toLowerCase())) {
+                alert('Word not in list!'); // Notify the user
+                return; // Do not proceed if the word is invalid
+            }
+    
             // Submit the current word
             const newBoard = [...board];
             newBoard[currentRow] = currentWord.split('');
@@ -63,20 +89,21 @@ const Game = () => {
     }, [currentWord, currentRow]);
 
     return (
-        <div className='game-container'>
+        <div className="game-container">
             <div>
-            {board.map((row, rowIndex) => (
-                <div key={rowIndex} className="row">
-                    {row.map((letter, colIndex) => {
-                        const status =
-                            rowIndex < currentRow
-                                ? getTileStatus(letter, colIndex)
-                                : '';
-                        return <Tile key={colIndex} letter={letter} status={status} />;
-                    })}
-                </div>
-            ))}
+                {board.map((row, rowIndex) => (
+                    <div key={rowIndex} className="row">
+                        {row.map((letter, colIndex) => {
+                            const status =
+                                rowIndex < currentRow
+                                    ? getTileStatus(letter, colIndex)
+                                    : '';
+                            return <Tile key={colIndex} letter={letter} status={status} />;
+                        })}
+                    </div>
+                ))}
             </div>
+            <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
         </div>
     )
 }
