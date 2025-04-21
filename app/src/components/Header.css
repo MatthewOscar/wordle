@@ -55,3 +55,18 @@
 .theme-toggle:hover {
     color: #c9b458;
 }
+
+.logout-button {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.3s;
+}
+
+.logout-button:hover {
+    color: #c9b458; /* Highlight color on hover */
+}

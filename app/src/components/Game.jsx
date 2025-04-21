@@ -12,6 +12,72 @@ const Game = ({ theme }) => {
     const [secretWord, setSecretWord] = useState('react'); // Example secret word
     const [keyStatuses, setKeyStatuses] = useState({});
     const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'won', or 'lost'
+
+    // Fetch user stats from the database
+    const [userStats, setUserStats] = useState({
+        games_won: 0,
+        current_streak: 0,
+        max_streak: 0,
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            const { data, error } = await supabase
+                .from('users')
+                .select('games_won, current_streak, max_streak')
+                .single();
+
+            if (error) {
+                console.error('Error fetching stats:', error.message);
+            } else {
+                setUserStats(data);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    const updateStatsOnWin = async () => {
+        const updatedStats = {
+            games_won: userStats.games_won + 1,
+            current_streak: userStats.current_streak + 1,
+        };
+
+        const { error } = await supabase
+            .from('user_stats')
+            .update(updatedStats)
+            .eq('id', supabase.auth.user().id);
+
+        if (error) {
+            console.error('Error updating stats on win:', error.message);
+        } else {
+            setUserStats((prev) => ({
+                ...prev,
+                ...updatedStats,
+            }));
+        }
+    };
+
+    const updateStatsOnLoss = async () => {
+        const updatedStats = {
+            max_streak: Math.max(userStats.max_streak, userStats.current_streak),
+            current_streak: 0,
+        };
+
+        const { error } = await supabase
+            .from('user_stats')
+            .update(updatedStats)
+            .eq('id', supabase.auth.user().id);
+
+        if (error) {
+            console.error('Error updating stats on loss:', error.message);
+        } else {
+            setUserStats((prev) => ({
+                ...prev,
+                ...updatedStats,
+            }));
+        }
+    };
     
     const getTileStatus = (letter, index) => {
         if (!secretWord.includes(letter)) return 'absent';
@@ -52,8 +118,10 @@ const Game = ({ theme }) => {
 
             if (currentWord.toLowerCase() === secretWord) {
                 setGameStatus('won'); // Player wins
+                updateStatsOnWin(); // Update stats in the database
             } else if (currentRow === 5) {
                 setGameStatus('lost'); // Player loses
+                updateStatsOnLoss(); // Update stats in the database
             } else {
                 setCurrentRow(currentRow + 1);
                 setCurrentWord('');

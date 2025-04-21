@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../Client.jsx';
 import './Login.css';
 
@@ -8,14 +9,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false); // Toggle between Login and Sign Up
-
-    // Function to hash the password using SHA-256
-    const sha256 = async (message) => {
-        const msgBuffer = new TextEncoder().encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-    };
+    const navigate = useNavigate(); // Initialize useNavigate
 
     // Handle email/password login or sign-up
     const handleAuth = async (e) => {
@@ -26,27 +20,49 @@ const Login = () => {
         try {
             if (isSignUp) {
                 // Sign Up logic
-                const { user, error } = await supabase.auth.signUp({
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
                     email,
-                    password: await sha256(password), // Hash the password before sending
+                    password, // Send plain-text password for Supabase sign-up
                 });
 
-                if (error) {
-                    setError(error.message);
+                if (signUpError) {
+                    setError(signUpError.message);
                 } else {
-                    console.log('Signed up user:', user);
+                    console.log('Signed up user:', signUpData);
+
+                    // Insert user into the "users" table
+                    const { data: userData, error: userError } = await supabase
+                        .from('users')
+                        .insert([
+                            {
+                                id: signUpData.user.id, // Use the Supabase user ID
+                                email: signUpData.user.email, // User's email
+                                password, // Store the plain-text password in the "password" column
+                                created_at: new Date(), // Timestamp for creation
+                            },
+                        ]);
+
+                    if (userError) {
+                        setError(userError.message);
+                    } else {
+                        console.log('User added to users table:', userData);
+                        alert('Sign-up successful! Please check your email to confirm your account.');
+                        navigate('/'); // Redirect to home page
+                    }
                 }
             } else {
                 // Login logic
-                const { user, error } = await supabase.auth.signInWithPassword({
+                const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
                     email,
-                    password: await sha256(password), // Hash the password before sending
+                    password, // Send plain-text password for login
                 });
 
-                if (error) {
-                    setError(error.message);
+                if (loginError) {
+                    setError(loginError.message);
                 } else {
-                    console.log('Logged in user:', user);
+                    // console.log('Logged in user:', loginData);
+                    alert('Login successful!');
+                    navigate('/'); // Redirect to home page
                 }
             }
         } catch (err) {
