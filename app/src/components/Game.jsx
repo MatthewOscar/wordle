@@ -48,6 +48,7 @@ const Game = () => {
             const newBoard = [...board];
             newBoard[currentRow] = currentWord.split('');
             setBoard(newBoard);
+            updateKeyStatuses();
             setCurrentRow(currentRow + 1);
             setCurrentWord('');
         } else if (key === 'Backspace') {
