@@ -1,9 +1,10 @@
 import React from 'react'
+import './Tile.css'
 
-const Tile = () => {
+const Tile = ({ letter, status }) => {
     return (
-        <div>
-            
+        <div className={`tile ${status}`}>
+            {letter}
         </div>
     )
 }

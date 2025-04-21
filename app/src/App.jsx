@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
+import { useRoutes, Link } from 'react-router-dom';
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+import Game from './components/Game.jsx'
+import './components/Tile.jsx'
 import './App.css'
 
 function App() {
@@ -10,7 +13,7 @@ function App() {
   let elements = useRoutes([
     {
       path: "/",
-      element: <div />
+      element: <Game />
     }
   ]);
 
