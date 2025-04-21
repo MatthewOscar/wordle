@@ -10,3 +10,27 @@
     margin-top: 80px;
     color: var(--text-color); /* Use theme variable */
   }
+
+/* Default game message styling */
+.game-message {
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Light theme styling */
+.light-theme {
+  background-color: #f9f9f9;
+  color: #333;
+  border: 2px solid #ccc;
+}
+
+/* Dark theme styling */
+.dark-theme {
+  background-color: #333;
+  color: #f9f9f9;
+  border: 2px solid #555;
+}

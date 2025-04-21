@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useRoutes, Link } from 'react-router-dom';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import Header from './components/Header.jsx'
 import Game from './components/Game.jsx'
 import Login from './pages/Login.jsx'

@@ -38,18 +38,46 @@ const Game = ({ theme }) => {
     }, []);
 
     const updateStatsOnWin = async () => {
+        const { data, error: userError } = await supabase.auth.getUser();
+        if (userError || !data?.user) {
+            console.error('Error fetching user or user not logged in:', userError?.message || 'No user found');
+            return;
+        }
+    
+        const userId = data.user.id; // Extract the user ID
+        // console.log('User ID:', userId); // Debug log to verify the user ID
+    
+        // Check if the user exists in the users table
+        const { data: userData, error: userDataError } = await supabase
+            .from('users')
+            .select()
+            .eq('id', userId)
+            .single();
+    
+        if (userDataError) {
+            console.error('Error fetching user data:', userDataError.message);
+            return;
+        }
+    
+        if (!userData) {
+            console.error('User not found in the users table.');
+            return;
+        }
+    
+        // Update the existing row
         const updatedStats = {
             games_won: userStats.games_won + 1,
             current_streak: userStats.current_streak + 1,
+            max_streak: Math.max(userStats.max_streak, userStats.current_streak + 1), // Update max_streak if needed
         };
-
-        const { error } = await supabase
-            .from('user_stats')
+    
+        const { error: updateError } = await supabase
+            .from('users')
             .update(updatedStats)
-            .eq('id', supabase.auth.user().id);
-
-        if (error) {
-            console.error('Error updating stats on win:', error.message);
+            .eq('id', userId);
+    
+        if (updateError) {
+            console.error('Error updating stats on win:', updateError.message);
         } else {
             setUserStats((prev) => ({
                 ...prev,
@@ -57,20 +85,47 @@ const Game = ({ theme }) => {
             }));
         }
     };
-
+    
     const updateStatsOnLoss = async () => {
+        const { data, error: userError } = await supabase.auth.getUser();
+        if (userError || !data?.user) {
+            console.error('Error fetching user or user not logged in:', userError?.message || 'No user found');
+            return;
+        }
+    
+        const userId = data.user.id; // Extract the user ID
+        console.log('User ID:', userId); // Debug log to verify the user ID
+    
+        // Check if the user exists in the users table
+        const { data: userData, error: userDataError } = await supabase
+            .from('users')
+            .select()
+            .eq('id', userId)
+            .single();
+    
+        if (userDataError) {
+            console.error('Error fetching user data:', userDataError.message);
+            return;
+        }
+    
+        if (!userData) {
+            console.error('User not found in the users table.');
+            return;
+        }
+    
+        // Update the existing row
         const updatedStats = {
-            max_streak: Math.max(userStats.max_streak, userStats.current_streak),
+            max_streak: Math.max(userData.max_streak, userData.current_streak),
             current_streak: 0,
         };
-
-        const { error } = await supabase
-            .from('user_stats')
+    
+        const { error: updateError } = await supabase
+            .from('users')
             .update(updatedStats)
-            .eq('id', supabase.auth.user().id);
-
-        if (error) {
-            console.error('Error updating stats on loss:', error.message);
+            .eq('id', userId);
+    
+        if (updateError) {
+            console.error('Error updating stats on loss:', updateError.message);
         } else {
             setUserStats((prev) => ({
                 ...prev,
@@ -117,8 +172,11 @@ const Game = ({ theme }) => {
             setBoard(newBoard);
 
             if (currentWord.toLowerCase() === secretWord) {
-                setGameStatus('won'); // Player wins
-                updateStatsOnWin(); // Update stats in the database
+                // Delay setting the game status to 'won' to allow the UI to render the final word's colors
+                setTimeout(() => {
+                    setGameStatus('won'); // Player wins
+                    updateStatsOnWin(); // Update stats in the database
+                }, 300); // Delay by 300ms
             } else if (currentRow === 5) {
                 setGameStatus('lost'); // Player loses
                 updateStatsOnLoss(); // Update stats in the database
@@ -192,13 +250,17 @@ const Game = ({ theme }) => {
                 ))}
             </div>
             {gameStatus === 'won' && (
-                <div className="game-message">
+                <div
+                    className={`game-message ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}
+                >
                     <p>Congratulations! You guessed the word!</p>
                     <button onClick={resetGame}>Play Again</button>
                 </div>
             )}
             {gameStatus === 'lost' && (
-                <div className="game-message">
+                <div
+                    className={`game-message ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}
+                >
                     <p>Game Over! The word was: {secretWord}</p>
                     <button onClick={resetGame}>Play Again</button>
                 </div>
