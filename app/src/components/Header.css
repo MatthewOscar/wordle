@@ -27,7 +27,6 @@
     justify-content: flex-end; /* Align options to the right */
     width: 100%; /* Make the options span the full width */
     gap: 15px;
-    margin-bottom: 10px; /* Add spacing between the options and the title */
 }
 
 .header-title {

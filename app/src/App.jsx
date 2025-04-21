@@ -41,7 +41,7 @@ function App() {
       <main>
         {elements}
       </main>
-      <footer></footer>
+      <footer>© 2025 GoLinks®, Inc. All Rights Reserved.</footer>
     </div>
   )
 }

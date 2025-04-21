@@ -51,7 +51,7 @@ const Header = ({ theme, toggleTheme }) => {
                 </button>
             </div>
             <div className="header-title">
-                <h1>WORDLE: By Matthew Wyatt</h1>
+                <h1>Matthew Wyatt's Wordle</h1>
             </div>
         </header>
     );

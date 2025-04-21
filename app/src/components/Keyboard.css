@@ -26,6 +26,13 @@
     transition: background-color 0.3s, border-color 0.3s;
 }
 
+/* Specific styling for the ENTER key */
+.key.Enter {
+    font-size: 0.5rem; /* Slightly smaller font size for ENTER */
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
 .key.correct {
     background-color: #6aaa64;
     border-color: #6aaa64;

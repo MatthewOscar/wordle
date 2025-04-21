@@ -201,14 +201,11 @@ const Game = ({ theme }) => {
     // New useEffect to handle pending wins
     useEffect(() => {
         if (pendingWin) {
-        // Introduce a small delay to allow React to render the updated board
-        const timer = setTimeout(() => {
+        // This didnt work
             setGameStatus('won');
             updateStatsOnWin(); // Update stats in the database
             setPendingWin(false); // Reset the pending win state
-        }, 2000); // Delay of 2000ms
 
-        return () => clearTimeout(timer); // Cleanup the timer
         }
     }, [board, pendingWin]); // Run this effect when the board or pendingWin changes
 

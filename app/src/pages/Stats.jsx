@@ -11,32 +11,56 @@ const Stats = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            setLoading(true);
-            setError(null);
-
-            const { data, error } = await supabase
-                .from('users')
-                .select('games_won, current_streak, max_streak, words_played')
-                .single();
-
-            if (error) {
-                console.error('Error fetching stats:', error.message);
-                setError('Failed to load stats. Please try again later.');
-            } else {
-                setStats(data);
+        const checkUser = async () => {
+            const { data, error } = await supabase.auth.getUser();
+            if (error || !data?.user) {
+                setIsLoggedIn(false);
+                setLoading(false);
+                return;
             }
+            setIsLoggedIn(true);
 
-            setLoading(false);
+            // Fetch stats if the user is logged in
+            const fetchStats = async () => {
+                setLoading(true);
+                setError(null);
+
+                const { data: statsData, error: statsError } = await supabase
+                    .from('users')
+                    .select('games_won, current_streak, max_streak, words_played')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (statsError) {
+                    console.error('Error fetching stats:', statsError.message);
+                    setError('Failed to load stats. Please try again later.');
+                } else {
+                    setStats(statsData);
+                }
+
+                setLoading(false);
+            };
+
+            fetchStats();
         };
 
-        fetchStats();
+        checkUser();
     }, []);
 
     if (loading) {
-        return <div className="stats-container">Loading stats...</div>;
+        return <div className="stats-container">Loading...</div>;
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <div className="stats-container">
+                <h1>Stats</h1>
+                <p>Please log in or sign up to view your stats.</p>
+            </div>
+        );
     }
 
     if (error) {
@@ -60,11 +84,9 @@ const Stats = () => {
                 <ul>
                     {stats.words_played.length > 0 ? (
                         stats.words_played
-                            .slice(-5) // Get the last 5 words
-                            .reverse() // Reverse to show the most recent word first
-                            .map((word, index) => (
-                                <li key={index}>{word.toUpperCase()}</li> // Capitalize the word
-                            ))
+                            .slice(-5)
+                            .reverse()
+                            .map((word, index) => <li key={index}>{word.toUpperCase()}</li>)
                     ) : (
                         <li>No words played yet.</li>
                     )}

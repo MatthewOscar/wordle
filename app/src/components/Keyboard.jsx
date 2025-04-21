@@ -15,10 +15,10 @@ const Keyboard = ({ onKeyPress, keyStatuses }) => {
                 <div key={rowIndex} className="keyboard-row">
                     {row.map((key) => (
                         <button
-                            key={key}
-                            className={`key ${keyStatuses[key] || ''}`}
-                            onClick={() => onKeyPress(key)}
-                        >
+                        key={key}
+                        className={`key ${key === 'Enter' ? 'Enter' : ''} ${keyStatuses[key] || ''}`}
+                        onClick={() => onKeyPress(key)}
+                    >
                             {key === 'Backspace' ? '←' : key.toUpperCase()}
                         </button>
                     ))}
